@@ -1,5 +1,7 @@
-package main.java.prakpbo;
+package prakpbo;
 
+import java.util.ArrayList;
+import java.util.Scanner;
 
 public abstract class smarthome {
     String id;
@@ -47,7 +49,7 @@ public abstract class smarthome {
     }
 
     public String printSemua(){
-        return nama +" " + id +" " +"Daya : "+ daya +" W" + "Status : "+status;
+        return nama +" (ID: "+ id +")"+" - Daya: "+ daya +"W |" + "Status : "+status+" | ";
     }
 
 }
@@ -65,7 +67,7 @@ interface Connectable{
 
 interface Switchable{
     void turnOn();
-    String turnOff();
+    void turnOff();
 }
 
 interface Lockable{
@@ -87,26 +89,24 @@ class SmartTV extends smarthome implements Connectable,Switchable{
     }
 
     @Override 
-    public void Switchable(){
-        turnOn();
+    public void turnOn() {
+        System.out.println("Perangkat Dinyalakan");
+    }
+
+    @Override 
+    public void turnOff(){
+        System.out.println("Perangkat Dimatikan");
     }
 
 
     @Override 
     public void Connectable(ConnectionType type){
         this.koneksi = type;
-
-        switch (type) {
-            case WIFI:
-                break;
-            default:
-                break;
-        }
     }
 
     @Override 
-    public void Connectable(){
-        disconnect();
+    public void disconnect(){
+        koneksi = ConnectionType.NONE;
     }
 
     @Override 
@@ -127,29 +127,32 @@ class smartSpeaker extends smarthome implements Switchable, Connectable{
     }
 
     @Override 
-    public void Switchable(){
-        turnOn();
+    public void turnOn(){
+        System.out.println("Perangkat dihidupkan");
+    }
+
+    @Override 
+    public void turnOff(){
+        System.out.println("Perangkat dimatikan");
     }
 
     @Override 
     public void Connectable(ConnectionType type){
         this.konek = type;
+    }
 
-        switch (type) {
-            case BLUETOOTH: 
-                break;
-            default:
-                break;
-        }
+    @Override 
+    public void disconnect(){
+        konek = ConnectionType.NONE;
     }
 
     @Override 
     public String printSemua(){
-        return super.printSemua() +"Koneksi : "+ konek +"Volume : "+ volume;
+        return super.printSemua() +" Koneksi : "+ konek +" Volume : "+ volume;
     }
 }
 
-class Smartlockdoor extends smarthome implements Switchable{
+class Smartlockdoor extends smarthome implements Lockable{
 
     String pin = "****";
 
@@ -158,31 +161,63 @@ class Smartlockdoor extends smarthome implements Switchable{
         
     }
 
+    @Override 
+    public void lock(){
+        System.out.println("Terkunci");
+    }
+
+    @Override 
+    public void unlock(){
+        System.out.println("Tidak terkunci");
+    }
+
     @Override
     public String printSemua(){
-        return super.printSemua() + "Pin : ";
+        return super.printSemua() + " Pin : "+pin;
     }
 
-    @Override 
-    public void Switchable(String statBaru){
-        this.status = statBaru;
-    }
-
-    @Override 
-    public String getStatusAwal(){
-        return status;
-    }
 
 
 }
 
-class MainTesr{
-    public static void main(String[] args) {
+class inputUtil{
 
+private static Scanner scanner = new Scanner(System.in);
 
-        SmartTV k = new SmartTV("Melvian", "12", 233, "Mati", 5, 32);
-        System.out.println(k.printSemua());
-
-
+    public static int readIInt(){
+           return scanner.nextInt();
     }
+
+    public static String readLine(){
+           return scanner.nextLine();
+    }
+        
+        public static void main(String[] args) {
+    
+        ArrayList<smarthome> daftarPerangkat = new ArrayList<>();
+
+        daftarPerangkat.add(new SmartTV("Smart TV [TV Living Room]", "TV-01", 120.0, "Menyala", 5, 20));
+        daftarPerangkat.add(new smartSpeaker("Smart Speaker [Echo Studio]", "SP-02", 30.0, "Menyala", 15));
+        daftarPerangkat.add(new Smartlockdoor("Smart Lock Door [Pintu Utama]", "DL-03", 15.0, "Terkunci"));
+
+
+
+        System.out.println("=====  Perangkat SamrtHome  =====\n");
+        for (smarthome perangkat : daftarPerangkat) {
+            System.out.println(perangkat.printSemua());
+        }
+
+        System.out.println("\n===== MENYALAKAN PERANGKAT YANG SWITCHABLE =====\n");
+
+        // INI DARI AI KO (KURANG MENGERTI MAAF) yang bagian instanceof
+        // Memilih hanya perangkat yang bisa di-ON/OFF
+        for (smarthome perangkat : daftarPerangkat) {
+            if (perangkat instanceof Switchable) {
+                // Type casting ke interface Switchable
+                Switchable sakelar = (Switchable) perangkat;
+                System.out.print(perangkat.getnama() + " -> ");
+                sakelar.turnOn();
+            }
+        }
+        }
 }
